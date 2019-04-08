@@ -6,6 +6,7 @@ import pygame
 import random
 from pygame import *
 
+
 pygame.init()
 
 scr_size = (width, height) = (600, 150)
@@ -393,7 +394,6 @@ def gameplay():
                     if event.type == pygame.QUIT:
                         gameQuit = True
                         gameOver = True
-
                     if event.type == pygame.KEYDOWN:
                         if event.key == pygame.K_SPACE:
                             if playerDino.rect.bottom == int(0.98 * height):
@@ -422,6 +422,13 @@ def gameplay():
                     playerDino.isDead = True
                     if pygame.mixer.get_init() is not None:
                         die_sound.play()
+
+            # Call routine passing (Dino object, Cacti container, Ptera container)
+            # Within this call will do all the logical work aka what event to trigger
+            # Then the genetic process will start, in which it will learn when to jump or duck
+            # -> Performs internal check against a number that will be mutated maybe
+            # -> Entire Functions will be crossed over, hopefully leading to those that have mastered
+            # certain events to pass on that "trait"
 
             if len(cacti) < 2:
                 if len(cacti) == 0:
