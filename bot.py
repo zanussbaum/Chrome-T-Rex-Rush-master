@@ -29,6 +29,7 @@ How to determine pixels (objects)
         instead of "seeing" objects
 Possible good practice would be to split up code base
 
-
+Pass all objects to a function to check what object is closest 
+and then trigger event in individuals 
 
 """

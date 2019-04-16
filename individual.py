@@ -22,23 +22,24 @@ Individual class
     Methods:
 
     def __init__(self):
-        create random array/string encoding
+        create random array encoding
+        array of integers that denotes the distance to which it will take the action
+        where each index referes to an event in the game
+
+        positive values mean jump
+        negative values mean duck 
 
     def crossover(self, other):
         crossover with other
-        maybe want to have a copy function to not changing individual object?
+        may want to have a copy function so we are not destroying individuals
 
     def mutate(self):
         mutate a point on array
 
     def fitness(self):
-        how are we going to measure this? 
+        fitness approximation through similarity 
 
     def similarity(self, other):
-        i remember talking about this, but wasn't totally clear on this part
-
-    def run(self, scenario):
-        scenario could be an int corrseponding to the event?
-
-        return array[scenario]?
+        run two instances that are as different as possible 
+        then compare with others to get an approximation of their fitness
 """
