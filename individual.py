@@ -19,7 +19,9 @@ class Individual:
         mutate():
             makes single point mutation 
         crossover(other):
-            crossover strategies with another individual 
+            crossover strategies with another individual
+        similarity(other):
+            compare two individuals and quantify how similar the are
 
     Attributes:
         strategy: integer encoding of when an action will be taken
@@ -102,22 +104,22 @@ class Individual:
         :param other: Referential Individual
         :return:
         """
-        self.fitness = other.fitness * self.similarity(other)
+        return other.fitness * self.similarity(other)
 
     def similarity(self, other):
         """
-        Private: gives the average difference in percentage between two individuals
+        Private: gives the average similarity in percentage between two individuals
         :param other: the other individual to be compared to
         :return:
         """
-        diff = 0
+        sim = 0
         for index in range(self.size):
-            diff += (self.strategy[index]/other.strategy[index])
-        diff /= self.size
-        if diff > 1: # Over 100% doesn't mean better
-            return 2 - diff
+            sim += (abs(self.strategy[index]/other.strategy[index]))
+        sim /= self.size
+        if sim > 1:  # Over 100% doesn't mean better
+            return 2 - sim
         else:
-            return diff
+            return sim
 
 
 
