@@ -89,6 +89,43 @@ def load_sprite_sheet(
     return sprites, sprite_rect
 
 
+def add_cactus(last_obstacle, gamespeed, cacti):
+    if len(cacti) < 2:
+        if len(cacti) == 0:
+            last_obstacle.empty()
+            last_obstacle.add(Cactus(gamespeed, 40, 40))
+        else:
+            for l in last_obstacle:
+                if l.rect.right < width * 0.7 and random.randrange(0, 50) == 10:
+                    last_obstacle.empty()
+                    last_obstacle.add(Cactus(gamespeed, 40, 40))
+        return True
+    else:
+        return False
+
+
+def add_ptera(last_obstacle, gamespeed, pteras, counter):
+    if len(pteras) == 0 and random.randrange(0, 200) == 10 and counter > 500:
+        for l in last_obstacle:
+            if l.rect.right < width * 0.8:
+                last_obstacle.empty()
+                last_obstacle.add(Ptera(gamespeed, 46, 40))
+        return True
+    else:
+        return False
+
+
+def move(container, dino, gamespeed):
+    for c in container:
+        c.movement[0] = -1 * gamespeed
+        if pygame.sprite.collide_mask(dino, c):
+            dino.isDead = True
+            if pygame.mixer.get_init() is not None:
+                die_sound.play()
+            return False
+    return True
+
+
 def disp_gameOver_msg(retbutton_image, gameover_image):
     retbutton_rect = retbutton_image.get_rect()
     retbutton_rect.centerx = width / 2
@@ -345,6 +382,7 @@ def introscreen():
         clock.tick(FPS)
         if temp_dino.isJumping is False and temp_dino.isBlinking is False:
             gameStart = True
+
 
 
 def gameplay():
