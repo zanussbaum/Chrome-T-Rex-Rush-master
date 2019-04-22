@@ -451,6 +451,7 @@ def gameplay():
                 c.movement[0] = -1 * gamespeed
                 if pygame.sprite.collide_mask(playerDino, c):
                     playerDino.isDead = True
+                    gameQuit = True
                     if pygame.mixer.get_init() is not None:
                         die_sound.play()
 
@@ -458,6 +459,7 @@ def gameplay():
                 p.movement[0] = -1 * gamespeed
                 if pygame.sprite.collide_mask(playerDino, p):
                     playerDino.isDead = True
+                    gameQuit = True
                     if pygame.mixer.get_init() is not None:
                         die_sound.play()
 

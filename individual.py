@@ -28,7 +28,7 @@ class Individual:
         fitness: a value based on how well an individual would do in the game 
         size: size of strategy array 
     """
-    def __init__(self, size=5, arr=None):
+    def __init__(self, size=8, arr=None):
         """Creating a random initial individual
 
         Parameters
@@ -46,7 +46,10 @@ class Individual:
         self.size = size
         self.fitness = 0
         if arr is None:
-            self.strategy = numpy.array([random.randint(-5,5) for x in range(self.size)])
+            self.strategy = numpy.array([random.randint(-50, 50) for x in range(self.size)])
+            for s in range(len(self.strategy)):
+                if self.strategy[s] == 0:
+                    self.strategy[s] = 1
         else:
             self.strategy = arr
 
@@ -120,7 +123,3 @@ class Individual:
             return 2 - sim
         else:
             return sim
-
-
-
-

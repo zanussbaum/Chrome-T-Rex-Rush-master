@@ -37,9 +37,10 @@ def act_on_scenario(species, cacti, pteras, dino, scenario):
     if closest <= abs(reaction):
         keyboard = Controller()
         if reaction > 0:
-            keyboard.press(Key.up)
+            keyboard.press(Key.space)
+            keyboard.release(Key.space)
         else:
-            keyboard.press(Key.down)
+            print("Would have pressed down")
 
 
 def calc_offset(dino, container):
@@ -112,9 +113,6 @@ def run_game(species):
     Ptera.containers = pteras
     Cloud.containers = clouds
 
-    retbutton_image, retbutton_rect = load_image('replay_button.png', 35, 31, -1)
-    gameover_image, gameover_rect = load_image('game_over.png', 190, 11, -1)
-
     temp_images, temp_rect = load_sprite_sheet('numbers.png', 12, 1, 11, int(11 * 6 / 5), -1)
     HI_image = pygame.Surface((22, int(11 * 6 / 5)))
     HI_rect = HI_image.get_rect()
@@ -137,7 +135,8 @@ def run_game(species):
                 # This seems to process the input and is NOT correlated to game events
                 # Right here seems the best place to decide on movements
                 scenario = select_scenario(cacti, pteras, playerDino)
-                act_on_scenario(species.strategy, cacti, pteras, playerDino, scenario)
+                if not (playerDino.isJumping and playerDino.isDead):
+                    act_on_scenario(species.strategy, cacti, pteras, playerDino, scenario)
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         gameQuit = True
@@ -197,51 +196,18 @@ def run_game(species):
                 gameOver = True
                 if playerDino.score > high_score:
                     high_score = playerDino.score
-
             if counter % 700 == 699:
                 new_ground.speed -= 1
                 gamespeed += 1
-
             counter = (counter + 1)
-
         if gameQuit:
             break
 
-        #Game Over loop, Since we never replay can maybe cut this entirely
-        while gameOver:
-            if pygame.display.get_surface() is None:
-                print("Couldn't load display surface")
-                gameQuit = True
-                gameOver = False
-            else:
-                for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        gameQuit = True
-                        gameOver = False
-                    if event.type == pygame.KEYDOWN:
-                        if event.key == pygame.K_ESCAPE:
-                            gameQuit = True
-                            gameOver = False
-
-                        if event.key == pygame.K_RETURN or event.key == pygame.K_SPACE:
-                            gameOver = False
-                            gameplay()
-            highsc.update(high_score)
-            if pygame.display.get_surface() is not None:
-                disp_gameOver_msg(retbutton_image, gameover_image)
-                if high_score != 0:
-                    highsc.draw()
-                    screen.blit(HI_image, HI_rect)
-                pygame.display.update()
-            clock.tick(FPS)
-
-    pygame.quit()
-    quit()
 
 
 def main():
     population = 20
-    individuals = [population]
+    individuals = [None] * population
     for spec in range(population):
         individuals[spec] = Individual()
     species1, species2 = det_testers(individuals)
@@ -251,7 +217,10 @@ def main():
         if ind != species1 and ind != species2:
             ind.fitness = (ind.fitness_approx(species1) + ind.fitness_approx(species2)) / 2
     # Crossover and Mutation
+    pygame.quit()
+    quit()
 
 
 if __name__ == "__main__":
     main()
+
