@@ -1,6 +1,9 @@
 from individual import Individual
 from main import *
 from pynput.keyboard import Key, Controller
+from random import sample, random, randrange
+from operator import attrgetter
+from time import sleep
 
 
 def det_testers(individuals):
@@ -40,7 +43,9 @@ def act_on_scenario(species, cacti, pteras, dino, scenario):
             keyboard.press(Key.space)
             keyboard.release(Key.space)
         else:
-            print("Would have pressed down")
+            keyboard.press(Key.down)
+            sleep(.5)
+            keyboard.release(Key.down)
 
 
 def calc_offset(dino, container):
@@ -166,8 +171,8 @@ def run_game(species):
             add_cactus(last_obstacle, gamespeed, cacti)
             add_ptera(last_obstacle, gamespeed, pteras, counter)
 
-            if len(clouds) < 5 and random.randrange(0, 300) == 10:
-                Cloud(width, random.randrange(height / 5, height / 2))
+            if len(clouds) < 5 and randrange(0, 300) == 10:
+                Cloud(width, randrange(height / 5, height / 2))
 
             playerDino.update()
             cacti.update()
@@ -208,15 +213,63 @@ def run_game(species):
 def main():
     population = 20
     individuals = [None] * population
+    
     for spec in range(population):
         individuals[spec] = Individual()
+
+    fittest = individuals[0]
+
+    #initial running of individuals
     species1, species2 = det_testers(individuals)
     run_game(species1)
     run_game(species2)
+
+    
     for ind in individuals:
         if ind != species1 and ind != species2:
             ind.fitness = (ind.fitness_approx(species1) + ind.fitness_approx(species2)) / 2
-    # Crossover and Mutation
+            if ind.fitness > fittest.fitness:
+                fittest = ind
+    
+    #may need to tweak this 
+    generations = 0
+    while fittest.fitness < 1000 or generations > 100:
+        generations += 1
+        print("generation %d" %(generations))
+
+        #performing operators 
+        new_population = []
+        # Crossover and Mutation
+        while len(new_population) < len(individuals):
+            operator = random()
+
+            if operator < .9:
+                ran_sample = sample(individuals,3)
+                first_parent = max(ran_sample, key=attrgetter('fitness'))
+                ran_sample = sample(individuals,3)
+                second_parent = max(ran_sample, key=attrgetter('fitness'))
+
+                first_child, second_child = first_parent.crossover(second_parent)
+                new_population.append(first_child)
+                new_population.append(second_child)
+            else:
+                ran_sample = sample(individuals,3)
+                parent = max(ran_sample, key=attrgetter('fitness'))
+                mutated = parent.mutate()
+                new_population.append(mutated)
+
+        individuals = new_population
+        species1, species2 = det_testers(individuals)
+        run_game(species1)
+        run_game(species2)
+
+    
+        for ind in individuals:
+            if ind != species1 and ind != species2:
+                ind.fitness = (ind.fitness_approx(species1) + ind.fitness_approx(species2)) / 2
+                if ind.fitness > fittest.fitness:
+                    fittest = ind
+    
     pygame.quit()
     quit()
 

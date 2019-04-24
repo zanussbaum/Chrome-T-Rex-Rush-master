@@ -74,9 +74,9 @@ class Individual:
         """
         to_mutate = self._copy()
 
-        point = random.randint(0, self.size)
+        point = random.randint(0, self.size-1)
 
-        to_mutate.strategy[point] = random.randint(-5, 5)
+        to_mutate.strategy[point] = random.randint(-50, 50)
 
         return to_mutate
 
@@ -92,10 +92,12 @@ class Individual:
         other_crossover = other._copy() # Need to fix scoping
         this_crossover = self._copy()
 
-        point = random.randint(0, self.size)
+        point = random.randint(1, self.size)
 
-        temp = this_crossover.strategy[point:]
-        this_crossover.strategy[point:] = other_crossover[point:]
+        temp = numpy.zeros(self.size - point, dtype=numpy.int64)
+        numpy.copyto(temp,this_crossover.strategy[point:])
+
+        this_crossover.strategy[point:] = other_crossover.strategy[point:]
         other_crossover.strategy[point:] = temp
 
         return this_crossover, other_crossover
@@ -123,3 +125,10 @@ class Individual:
             return 2 - sim
         else:
             return sim
+
+
+if __name__ == "__main__":
+    one = Individual()
+    two = Individual()
+
+    f,t = one.crossover(two)
