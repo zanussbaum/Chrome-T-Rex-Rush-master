@@ -1,9 +1,10 @@
+import time as t
 from individual import Individual
 from main import *
 from pynput.keyboard import Key, Controller
 from random import sample, random, randrange
 from operator import attrgetter
-from time import sleep
+
 
 
 def det_testers(individuals):
@@ -37,26 +38,25 @@ def det_closest(cacti, pteras, dino):
 def act_on_scenario(species, cacti, pteras, dino, scenario):
     reaction = species[scenario]
     closest = det_closest(cacti, pteras, dino)
+    keyboard = Controller()
     if closest <= abs(reaction):
-        keyboard = Controller()
         if reaction > 0:
             keyboard.press(Key.space)
             keyboard.release(Key.space)
-        else:
+        else:                   
             keyboard.press(Key.down)
-            sleep(.5)
-            keyboard.release(Key.down)
 
 
 def calc_offset(dino, container):
     offset = 0
     # Ignore those past us already
-    for c in container:
-        if c.rect.right < dino.rect.left:
-            offset += 1
+    for c in container:  
+        if c.rect.right < dino.rect.left:             
+            offset += 1    
     return offset
 
-
+#look at scenario 6 
+#i think scenario 4 showed up incorrectly 
 def select_scenario(cacti, pteras, dino):
     offset_cactus = calc_offset(dino, cacti)
     cacti_amt = len(cacti) - offset_cactus
@@ -64,7 +64,7 @@ def select_scenario(cacti, pteras, dino):
     ptera_amt = len(pteras) - offset_ptera
     if cacti_amt == 1:
         if ptera_amt == 0:
-            return 0
+            return 0  
         elif ptera_amt == 1:
             return 1
         elif ptera_amt == 2:
@@ -90,7 +90,7 @@ def select_scenario(cacti, pteras, dino):
         elif ptera_amt == 2:
             return 8
         else:
-            print("We had no cacti and more than 2 Birds")
+            print("We had no cacti and more than 2 Birds"    )
             exit(-1)
     else:
         print("We had more than 2 cacti")
@@ -140,7 +140,7 @@ def run_game(species):
                 # This seems to process the input and is NOT correlated to game events
                 # Right here seems the best place to decide on movements
                 scenario = select_scenario(cacti, pteras, playerDino)
-                if not (playerDino.isJumping and playerDino.isDead):
+                if not (playerDino.isJumping and playerDino.isDucking and playerDino.isDead):
                     act_on_scenario(species.strategy, cacti, pteras, playerDino, scenario)
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
@@ -207,6 +207,8 @@ def run_game(species):
             counter = (counter + 1)
         if gameQuit:
             break
+    print(playerDino.score)
+    return playerDino.score
 
 
 
@@ -221,8 +223,8 @@ def main():
 
     #initial running of individuals
     species1, species2 = det_testers(individuals)
-    run_game(species1)
-    run_game(species2)
+    species1.fitness = run_game(species1)
+    species2.fitness = run_game(species2)
 
     
     for ind in individuals:
@@ -234,6 +236,7 @@ def main():
     #may need to tweak this 
     generations = 0
     while fittest.fitness < 1000 or generations > 100:
+        print("fittest %s" %(fittest))
         generations += 1
         print("generation %d" %(generations))
 
@@ -259,16 +262,28 @@ def main():
                 new_population.append(mutated)
 
         individuals = new_population
-        species1, species2 = det_testers(individuals)
-        run_game(species1)
-        run_game(species2)
 
-    
+        species1, species2 = det_testers(individuals)
+        species1.fitness = run_game(species1)
+        print("first species")
+        print(species1)
+        
+        species2.fitness = run_game(species2)
+        print("second species")
+        print(species2)
+
+
         for ind in individuals:
             if ind != species1 and ind != species2:
                 ind.fitness = (ind.fitness_approx(species1) + ind.fitness_approx(species2)) / 2
                 if ind.fitness > fittest.fitness:
                     fittest = ind
+
+        if species1.fitness > fittest.fitness:
+            fittest = species1
+
+        if species2.fitness > fittest.fitness:
+            fittest = species2
     
     pygame.quit()
     quit()

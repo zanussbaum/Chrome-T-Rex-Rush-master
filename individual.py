@@ -52,6 +52,20 @@ class Individual:
                     self.strategy[s] = 1
         else:
             self.strategy = arr
+    def __str__(self):
+        """Overwritten string representation
+        """
+
+        string = "["
+
+        for i in self.strategy:
+            string += " " + str(i)
+        
+        string += "]"
+
+        string += " " + str(self.fitness)
+
+        return string          
 
     def _copy(self):
         """Private method that returns a copy of the individual
@@ -119,7 +133,7 @@ class Individual:
         """
         sim = 0
         for index in range(self.size):
-            sim += (abs(self.strategy[index]/other.strategy[index]))
+            sim += (abs(self.strategy[index]/other.strategy[index] if other.strategy[index] else 0))
         sim /= self.size
         if sim > 1:  # Over 100% doesn't mean better
             return 2 - sim
