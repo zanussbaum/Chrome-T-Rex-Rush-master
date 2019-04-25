@@ -94,7 +94,7 @@ def select_scenario(cacti, pteras, dino):
             exit(-1)
     else:
         print("We had more than 2 cacti")
-        exit(-1)
+        exit(-1)          
 
 
 def run_game(species):
@@ -164,10 +164,8 @@ def run_game(species):
 
             if not move(cacti, playerDino, gamespeed):
                 gameQuit = True
-                species.fitness = high_score
             if not move(pteras, playerDino, gamespeed):
                 gameQuit = True
-                species.fitness = high_score
             add_cactus(last_obstacle, gamespeed, cacti)
             add_ptera(last_obstacle, gamespeed, pteras, counter)
 
@@ -207,7 +205,6 @@ def run_game(species):
             counter = (counter + 1)
         if gameQuit:
             break
-    print(playerDino.score)
     return playerDino.score
 
 
@@ -226,12 +223,14 @@ def main():
     species1.fitness = run_game(species1)
     species2.fitness = run_game(species2)
 
+    fittest = species1 if species1.fitness > species2.fitness else species2
     
     for ind in individuals:
         if ind != species1 and ind != species2:
             ind.fitness = (ind.fitness_approx(species1) + ind.fitness_approx(species2)) / 2
             if ind.fitness > fittest.fitness:
                 fittest = ind
+
     
     #may need to tweak this 
     generations = 0
