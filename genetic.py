@@ -1,10 +1,10 @@
-import time as t
 from individual import Individual
 from main import *
 from pynput.keyboard import Key, Controller
 from random import sample, random, randrange
 from operator import attrgetter
 
+# Current idea for ducking -> Duck for X amount of frames (loops)
 
 
 def det_testers(individuals):
@@ -55,8 +55,12 @@ def calc_offset(dino, container):
             offset += 1    
     return offset
 
-#look at scenario 6 
-#i think scenario 4 showed up incorrectly 
+
+# look at scenario 6
+# F: Whoops true haha, probably best to just delete that one
+#   Or maybe better just hard code that to be no response
+# i think scenario 4 showed up incorrectly
+
 def select_scenario(cacti, pteras, dino):
     offset_cactus = calc_offset(dino, cacti)
     cacti_amt = len(cacti) - offset_cactus
@@ -216,8 +220,6 @@ def main():
     for spec in range(population):
         individuals[spec] = Individual()
 
-    fittest = individuals[0]
-
     #initial running of individuals
     species1, species2 = det_testers(individuals)
     species1.fitness = run_game(species1)
@@ -231,7 +233,6 @@ def main():
             if ind.fitness > fittest.fitness:
                 fittest = ind
 
-    
     #may need to tweak this 
     generations = 0
     while fittest.fitness < 1000 or generations > 100:
@@ -270,7 +271,6 @@ def main():
         species2.fitness = run_game(species2)
         print("second species")
         print(species2)
-
 
         for ind in individuals:
             if ind != species1 and ind != species2:
