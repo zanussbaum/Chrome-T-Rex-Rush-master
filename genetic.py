@@ -35,7 +35,7 @@ def det_closest(cacti, pteras, dino):
     return min
 
 
-def act_on_scenario(species, cacti, pteras, dino, scenario, duck_counter):
+def act_on_scenario(species, cacti, pteras, dino, scenario):
     reaction = species[scenario]
     closest = det_closest(cacti, pteras, dino)
     keyboard = Controller()
@@ -43,12 +43,8 @@ def act_on_scenario(species, cacti, pteras, dino, scenario, duck_counter):
         if reaction > 0:
             keyboard.press(Key.space)
             keyboard.release(Key.space)
-        else:
-            if duck_counter < 0:
-                keyboard.release(Key.down)
-            else:
-                keyboard.press(Key.down)
-                keyboard.release(Key.down)
+        else:                   
+            keyboard.press(Key.down)
 
 
 def calc_offset(dino, container):
@@ -115,8 +111,7 @@ def run_game(species):
     new_ground = Ground(-1 * gamespeed)
     scb = Scoreboard()
     highsc = Scoreboard(width * 0.78)
-    frame_counter = 0
-    duck_counter = 0
+    counter = 0
 
     cacti = pygame.sprite.Group()
     pteras = pygame.sprite.Group()
@@ -149,33 +144,26 @@ def run_game(species):
                 # This seems to process the input and is NOT correlated to game events
                 # Right here seems the best place to decide on movements
                 scenario = select_scenario(cacti, pteras, playerDino)
-                if duck_counter > 0:
-                    duck_counter -= 1
-                    playerDino.isDucking = True
-                else:
-                    playerDino.isDucking = False
                 if not (playerDino.isJumping and playerDino.isDucking and playerDino.isDead):
-                    act_on_scenario(species.strategy, cacti, pteras, playerDino, scenario, duck_counter)
+                    act_on_scenario(species.strategy, cacti, pteras, playerDino, scenario)
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         gameQuit = True
                         gameOver = True
                     if event.type == pygame.KEYDOWN:
                         if event.key == pygame.K_SPACE:
-                            if not playerDino.isDucking:
-                                if playerDino.rect.bottom == int(0.98 * height):
-                                    playerDino.isJumping = True
-                                    if pygame.mixer.get_init() is not None:
-                                        jump_sound.play()
-                                    playerDino.movement[1] = -1 * playerDino.jumpSpeed
+                            if playerDino.rect.bottom == int(0.98 * height):
+                                playerDino.isJumping = True
+                                if pygame.mixer.get_init() is not None:
+                                    jump_sound.play()
+                                playerDino.movement[1] = -1 * playerDino.jumpSpeed
 
                         if event.key == pygame.K_DOWN:
                             if not (playerDino.isJumping and playerDino.isDead):
                                 playerDino.isDucking = True
-                                duck_counter = 50
 
                     if event.type == pygame.KEYUP:
-                        if event.key == pygame.K_DOWN and duck_counter <= 0:
+                        if event.key == pygame.K_DOWN:
                             playerDino.isDucking = False
 
             if not move(cacti, playerDino, gamespeed):
@@ -183,7 +171,7 @@ def run_game(species):
             if not move(pteras, playerDino, gamespeed):
                 gameQuit = True
             add_cactus(last_obstacle, gamespeed, cacti)
-            add_ptera(last_obstacle, gamespeed, pteras, frame_counter)
+            add_ptera(last_obstacle, gamespeed, pteras, counter)
 
             if len(clouds) < 5 and randrange(0, 300) == 10:
                 Cloud(width, randrange(height / 5, height / 2))
@@ -215,10 +203,10 @@ def run_game(species):
                 gameOver = True
                 if playerDino.score > high_score:
                     high_score = playerDino.score
-            if frame_counter % 700 == 699:
+            if counter % 700 == 699:
                 new_ground.speed -= 1
                 gamespeed += 1
-            frame_counter = (frame_counter + 1)
+            counter = (counter + 1)
         if gameQuit:
             break
     return playerDino.score
