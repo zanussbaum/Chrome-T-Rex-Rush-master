@@ -3,10 +3,12 @@ from main import *
 from pynput.keyboard import Key, Controller
 from random import sample, random, randrange
 from operator import attrgetter
+from kmeans import KMeans
 
 # Current idea for ducking -> Duck for X amount of frames (loops)
 
-
+# try k-means for similarity, clusters of 3? 
+#then do percent difference and run only the centroids 
 def det_testers(individuals):
     max_diff = 100
     species1 = None
@@ -136,6 +138,7 @@ def run_game(species):
     HI_image.blit(temp_images[11], temp_rect)
     HI_rect.top = height * 0.1
     HI_rect.left = width * 0.73
+    last_scenario = 0
 
     while not gameQuit:
         while startMenu:
@@ -149,6 +152,8 @@ def run_game(species):
                 # This seems to process the input and is NOT correlated to game events
                 # Right here seems the best place to decide on movements
                 scenario = select_scenario(cacti, pteras, playerDino)
+                if scenario != last_scenario:
+                    last_scenario = scenario
                 if duck_counter > 0:
                     duck_counter -= 1
                     playerDino.isDucking = True
@@ -233,7 +238,12 @@ def main():
         individuals[spec] = Individual()
 
     #initial running of individuals
-    species1, species2 = det_testers(individuals)
+    # species1, species2 = det_testers(individuals)
+
+    centroids,labels,closest = KMeans(individuals,2).run()
+    species1 = centroids[0]
+    species2 = centroids[1]
+
     species1.fitness = run_game(species1)
     species2.fitness = run_game(species2)
 
@@ -275,11 +285,16 @@ def main():
 
         individuals = new_population
 
-        species1, species2 = det_testers(individuals)
+        # species1, species2 = det_testers(individuals)
+        centroids,labels,closest = KMeans(individuals,2).run()
+        species1 = centroids[0]
+        
+        
         species1.fitness = run_game(species1)
         print("first species")
         print(species1)
         
+        species2 = centroids[1]
         species2.fitness = run_game(species2)
         print("second species")
         print(species2)

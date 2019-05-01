@@ -1,14 +1,5 @@
-"""
-    TO DO STILL:
-    def similarity(self, other):
-        --> These will be done in the main runner
-        run two instances that are as different as possible 
-        then compare with others to get an approximation of their fitness
-Something to be aware of is right now duck and jump are super different when calcing difference
-"""
 import random
 import numpy
-
 
 class Individual:
     """Individual class with a strategy for each scenario 
@@ -63,11 +54,34 @@ class Individual:
         
         string += "]"
 
-        string += " " + str(self.fitness)
+        return string
 
-        return string          
+    def __repr__(self):
+        """Overwritten representation of object
+        """
+        return self.__str__()
 
-    def _copy(self):
+    def __eq__(self, other):
+        """Overwritten equality 
+        """
+        return numpy.array_equal(self.strategy, other.strategy)
+
+    def __key(self):
+        """
+        """
+        return (tuple(self.strategy))
+
+    def __hash__(self):
+        """
+        """
+        return hash(self.__key())
+
+    def __sub__(self,other):
+        """Overwritten subtraction method
+        """
+        return numpy.linalg.norm(numpy.subtract(self.strategy,other.strategy))
+                 
+    def __copy(self):
         """Private method that returns a copy of the individual
 
         Returns:
@@ -86,7 +100,7 @@ class Individual:
         Returns:
             copy: a mutated individual 
         """
-        to_mutate = self._copy()
+        to_mutate = self.__copy()
 
         point = random.randint(0, self.size-1)
 
@@ -103,8 +117,8 @@ class Individual:
         Returns:
             this_crossover, other_crossover: two new crossed individuals 
         """
-        other_crossover = other._copy() # Need to fix scoping
-        this_crossover = self._copy()
+        other_crossover = other.__copy() # Need to fix scoping
+        this_crossover = self.__copy()
 
         point = random.randint(1, self.size)
 
