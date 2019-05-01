@@ -145,14 +145,10 @@ class Individual:
         :param other: the other individual to be compared to
         :return:
         """
-        sim = 0
-        for index in range(self.size):
-            sim += (abs(self.strategy[index]/other.strategy[index] if other.strategy[index] else 0))
-        sim /= self.size
-        if sim > 1:  # Over 100% doesn't mean better
-            return 2 - sim
-        else:
-            return sim
+        difference = other - self
+        norm = numpy.linalg.norm(other.fitness)
+
+        return difference/norm
 
 
 if __name__ == "__main__":

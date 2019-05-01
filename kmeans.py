@@ -52,7 +52,7 @@ class KMeans:
         Creates a mapping of centroids to a list of individuals
         """
         labels = {}
-        #error here, maybe empty centroid? 
+         
         for c in self.centroids:
             labels.update({c:[]})
 
@@ -100,9 +100,7 @@ class KMeans:
         Returns:
             list, dictionary, list: list of centroids, dictinary of lables, list of closest points to centroids
         """
-        # print("original centroids %s" %(self.centroids))
         while not self.stopping_condition():
-            # print("iteration %d" %(self.iterations))
             self.iterations += 1
             self.prev_centroids = self.centroids
 
@@ -115,7 +113,6 @@ class KMeans:
         for centroid in self.centroids:
             diff = [(ind, abs(ind-centroid)) for ind in self.dataset]
             min_ind = min(diff, key=lambda t:t[1])
-            # print("the closest centroid for centroid %s in the list is %s" %(centroid, min_ind))
             closest_centroids.append(min_ind[0])
 
         return self.centroids, self.labels, closest_centroids

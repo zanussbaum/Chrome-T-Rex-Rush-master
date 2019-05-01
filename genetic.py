@@ -1,9 +1,12 @@
+from matplotlib.pyplot import plot,show
 from individual import Individual
 from main import *
 from pynput.keyboard import Key, Controller
 from random import sample, random, randrange
 from operator import attrgetter
 from kmeans import KMeans
+from statistics import mean
+   
 
 # Current idea for ducking -> Duck for X amount of frames (loops)
 
@@ -30,7 +33,7 @@ def det_closest(cacti, pteras, dino):
         distance = c.rect.left - dino.rect.right
         if distance < min:
             min = distance
-    for p in pteras:
+    for p in pteras:   
         distance = p.rect.left - dino.rect.right
         if distance < min:
             min = distance
@@ -231,14 +234,14 @@ def run_game(species):
 
 
 def main():
-    population = 20
+    population = 50
     individuals = [None] * population
     
     for spec in range(population):
         individuals[spec] = Individual()
 
     #initial running of individuals
-    centroids,labels,closest = KMeans(individuals,2).run()
+    centroids,labels,closest = KMeans(individuals,3).run()
 
 
     for centroid in labels.keys():
@@ -250,37 +253,37 @@ def main():
 
     fittest = max(individuals,key=attrgetter('fitness'))
 
+    avg_fitness = []
+    avg_fitness.append(mean([ind.fitness for ind in individuals]))
+
     generations = 0
-    while fittest.fitness < 1000 or generations > 100:
+    while fittest.fitness < 1000 and generations < 100:
         print("fittest %s: %f" %(fittest, fittest.fitness))
         generations += 1
         print("generation %d" %(generations))
 
-        #performing operators 
         new_population = []
-        # Crossover and Mutation
         while len(new_population) < len(individuals):
             operator = random()
 
             if operator < .9:
-                ran_sample = sample(individuals,3)
+                ran_sample = sample(individuals,5)
                 first_parent = max(ran_sample, key=attrgetter('fitness'))
-                ran_sample = sample(individuals,3)
+                ran_sample = sample(individuals,5)
                 second_parent = max(ran_sample, key=attrgetter('fitness'))
 
                 first_child, second_child = first_parent.crossover(second_parent)
                 new_population.append(first_child)
                 new_population.append(second_child)
             else:
-                ran_sample = sample(individuals,3)
+                ran_sample = sample(individuals,5)
                 parent = max(ran_sample, key=attrgetter('fitness'))
                 mutated = parent.mutate()
                 new_population.append(mutated)
 
         individuals = new_population
 
-        # species1, species2 = det_testers(individuals)
-        centroids,labels,closest = KMeans(individuals,2).run()
+        centroids,labels,closest = KMeans(individuals,3).run()
 
         for centroid in labels.keys():
             print("species %s" %(centroid))
@@ -290,10 +293,17 @@ def main():
             for individual in labels.get(centroid):
                 individual.fitness = individual.fitness_approx(centroid)
 
+        avg_fitness.append(mean([ind.fitness for ind in individuals]))
+
         fittest = max(individuals,key=attrgetter('fitness')) if max(individuals,key=attrgetter('fitness')).fitness > fittest.fitness else fittest
 
     pygame.quit()
     quit()
+
+    x = [i for i in range(generations+1)]
+
+    plot(x,avg_fitness, 'b--')
+    show()
 
 
 if __name__ == "__main__":
