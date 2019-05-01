@@ -238,27 +238,21 @@ def main():
         individuals[spec] = Individual()
 
     #initial running of individuals
-    # species1, species2 = det_testers(individuals)
-
     centroids,labels,closest = KMeans(individuals,2).run()
-    species1 = centroids[0]
-    species2 = centroids[1]
 
-    species1.fitness = run_game(species1)
-    species2.fitness = run_game(species2)
 
-    fittest = species1 if species1.fitness > species2.fitness else species2
-    
-    for ind in individuals:
-        if ind != species1 and ind != species2:
-            ind.fitness = (ind.fitness_approx(species1) + ind.fitness_approx(species2)) / 2
-            if ind.fitness > fittest.fitness:
-                fittest = ind
+    for centroid in labels.keys():
+        centroid.fitness = run_game(centroid)
 
-    #may need to tweak this 
+    for centroid in labels.keys():
+        for individual in labels.get(centroid):
+            individual.fitness = individual.fitness_approx(centroid)
+
+    fittest = max(individuals,key=attrgetter('fitness'))
+
     generations = 0
     while fittest.fitness < 1000 or generations > 100:
-        print("fittest %s" %(fittest))
+        print("fittest %s: %f" %(fittest, fittest.fitness))
         generations += 1
         print("generation %d" %(generations))
 
@@ -287,30 +281,17 @@ def main():
 
         # species1, species2 = det_testers(individuals)
         centroids,labels,closest = KMeans(individuals,2).run()
-        species1 = centroids[0]
-        
-        
-        species1.fitness = run_game(species1)
-        print("first species")
-        print(species1)
-        
-        species2 = centroids[1]
-        species2.fitness = run_game(species2)
-        print("second species")
-        print(species2)
 
-        for ind in individuals:
-            if ind != species1 and ind != species2:
-                ind.fitness = (ind.fitness_approx(species1) + ind.fitness_approx(species2)) / 2
-                if ind.fitness > fittest.fitness:
-                    fittest = ind
+        for centroid in labels.keys():
+            print("species %s" %(centroid))
+            centroid.fitness = run_game(centroid)
 
-        if species1.fitness > fittest.fitness:
-            fittest = species1
+        for centroid in labels.keys():
+            for individual in labels.get(centroid):
+                individual.fitness = individual.fitness_approx(centroid)
 
-        if species2.fitness > fittest.fitness:
-            fittest = species2
-    
+        fittest = max(individuals,key=attrgetter('fitness')) if max(individuals,key=attrgetter('fitness')).fitness > fittest.fitness else fittest
+
     pygame.quit()
     quit()
 

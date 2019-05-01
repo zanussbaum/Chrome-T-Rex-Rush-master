@@ -1,9 +1,16 @@
 import numpy
 from individual import Individual
-from random import sample
+from random import sample, choice
 
 class KMeans:
-    """Rewritten KMeans for Individuals 
+    """KMeans Algorithm for instance Individuals
+
+    Methods:
+        random_centroids(): initialize centroids to k random Individuals
+        stopping_condition(): boolean that denotes if the stopping condition has been met
+        write_labels(): writes the labels for the centroids to individuals 
+        new_centroids(): calculates new centroids
+        run(): runs the algorithm
     """
     def __init__(self, dataset, k, max_iterations=100):
         self.dataset = dataset
@@ -17,6 +24,11 @@ class KMeans:
 
     def random_centroids(self):
         """Initialize centroids to random centers
+
+        Pick k random centers to calculate centroids
+
+        Returns:
+            list: random centroids
         """
         centroids = sample(self.dataset,self.k)
 
@@ -24,15 +36,23 @@ class KMeans:
 
     def stopping_condition(self):
         """Stopping condition for the kmeans algorithm
+
+        KMeans stops if it has reached the max 
+
+        Returns:
+            boolean: true if the condition has been met
         """
         if self.iterations > self.max_iterations:
             return True
         return self.centroids == self.prev_centroids
 
     def write_labels(self):
-        """Denote a centroid for a each individual 
+        """Maps individuals to centroids by creating labels
+
+        Creates a mapping of centroids to a list of individuals
         """
         labels = {}
+        #error here, maybe empty centroid? 
         for c in self.centroids:
             labels.update({c:[]})
 
@@ -43,14 +63,14 @@ class KMeans:
             centroid = min(difference, key=lambda t: t[1])
             if ind not in self.labels.keys():
                 labels = self.labels.get(centroid[0])
-                if labels is None:
-                    temp = 1
                 labels.append(ind)
                 self.labels.update({centroid[0]:labels})
             
     def new_centroids(self):
-        """Need to figure out how to calculate mean here 
-            and then use that to find the new centroids 
+        """Calculates the new centroids from the given labels
+
+        If a centroid has no points that have it as its label, it
+            reassigns the centroid to a random individual in the dataset
         """
 
         centroids = []
@@ -58,19 +78,27 @@ class KMeans:
         for cent in self.labels.keys():
             vals = self.labels.get(cent)
             n = len(vals)
-            
+
             if n != 0:
                 new_arr = numpy.sum([a.strategy for a in vals], axis=0)
                 new_arr = numpy.true_divide(new_arr, n)
-
                 new_ind = Individual(arr=new_arr)
-                centroids.append(new_ind)
+
+            #if centroid has no other labels, randomly reinitialize a new centroid
+            else:
+                new_ind = choice(self.dataset)
+
+            
+            centroids.append(new_ind)
 
         self.centroids = centroids
 
 
     def run(self):
-        """Run kmeans
+        """Run kmeans algorithm
+
+        Returns:
+            list, dictionary, list: list of centroids, dictinary of lables, list of closest points to centroids
         """
         # print("original centroids %s" %(self.centroids))
         while not self.stopping_condition():
