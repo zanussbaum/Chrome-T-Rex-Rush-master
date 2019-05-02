@@ -234,14 +234,14 @@ def run_game(species):
 
 
 def main():
-    population = 50
+    population = 100
     individuals = [None] * population
     
     for spec in range(population):
         individuals[spec] = Individual()
 
     #initial running of individuals
-    centroids,labels,closest = KMeans(individuals,3).run()
+    centroids,labels,closest = KMeans(individuals,4).run()
 
 
     for centroid in labels.keys():
@@ -296,6 +296,10 @@ def main():
         avg_fitness.append(mean([ind.fitness for ind in individuals]))
 
         fittest = max(individuals,key=attrgetter('fitness')) if max(individuals,key=attrgetter('fitness')).fitness > fittest.fitness else fittest
+
+    print("running fittest")
+    score = run_game(fittest)
+    print("fittest had a score of %d" %(score))
 
     pygame.quit()
     quit()
