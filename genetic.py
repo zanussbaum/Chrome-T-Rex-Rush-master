@@ -7,11 +7,6 @@ from operator import attrgetter
 from kmeans import KMeans
 from statistics import mean
    
-
-# Current idea for ducking -> Duck for X amount of frames (loops)
-
-# try k-means for similarity, clusters of 3? 
-#then do percent difference and run only the centroids 
 def det_testers(individuals):
     max_diff = 100
     species1 = None
@@ -260,11 +255,17 @@ def main():
     fittest = max(individuals,key=attrgetter('fitness'))
 
     avg_fitness = []
-    avg_fitness.append(mean([ind.fitness for ind in individuals]))
+    fittest_score = []
+    
 
     generations = 0
-    while fittest.fitness < 1000 and generations < 3000:
+    while generations < 3:
         print("fittest %s: %f" %(fittest, fittest.fitness))
+        fittest_score.append(fittest.fitness)
+
+        print("average fitness is %f" %(mean([ind.fitness for ind in individuals])))
+        avg_fitness.append(mean([ind.fitness for ind in individuals]))
+
         generations += 1
         print("generation %d" %(generations))
 
@@ -289,7 +290,7 @@ def main():
 
         individuals = new_population
 
-        centroids,labels,closest = KMeans(individuals,3).run()
+        centroids,labels,closest = KMeans(individuals,4).run()
 
         for centroid in labels.keys():
             print("species %s" %(centroid))
@@ -299,8 +300,7 @@ def main():
             for individual in labels.get(centroid):
                 individual.fitness = individual.fitness_approx(centroid)
 
-        avg_fitness.append(mean([ind.fitness for ind in individuals]))
-
+        
         fittest = max(individuals,key=attrgetter('fitness')) if max(individuals,key=attrgetter('fitness')).fitness > fittest.fitness else fittest
 
     print("running fittest")
@@ -310,9 +310,10 @@ def main():
     pygame.quit()
     quit()
 
-    x = [i for i in range(generations+1)]
+    x = [i for i in range(generations)]
 
-    plot(x,avg_fitness, 'b--')
+    plot(x,avg_fitness, 'x--')
+    plot(x, fittest_score, '+--')
     show()
 
 

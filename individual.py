@@ -37,7 +37,7 @@ class Individual:
         self.size = size
         self.fitness = 0
         if arr is None:
-            self.strategy = numpy.array([random.randint(-50, 50) for x in range(self.size)])
+            self.strategy = numpy.array([random.randint(-556, 556) for x in range(self.size)])
             for s in range(len(self.strategy)):
                 if self.strategy[s] == 0:
                     self.strategy[s] = 1
@@ -79,7 +79,7 @@ class Individual:
     def __sub__(self,other):
         """Overwritten subtraction method
         """
-        return numpy.linalg.norm(numpy.subtract(self.strategy,other.strategy))
+        return numpy.linalg.norm(numpy.subtract(numpy.absolute(self.strategy),numpy.absolute(other.strategy)))
                  
     def __copy(self):
         """Private method that returns a copy of the individual
@@ -104,7 +104,7 @@ class Individual:
 
         point = random.randint(0, self.size-1)
 
-        to_mutate.strategy[point] = random.randint(-50, 50)
+        to_mutate.strategy[point] = random.randint(-556, 556)
 
         return to_mutate
 
@@ -146,7 +146,7 @@ class Individual:
         :return:
         """
         difference = other - self
-        norm = numpy.linalg.norm(other.fitness)
+        norm = numpy.linalg.norm(other.strategy)
 
         return difference/norm
 
