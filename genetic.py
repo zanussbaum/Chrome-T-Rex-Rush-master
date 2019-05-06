@@ -29,22 +29,28 @@ def det_testers(individuals):
 
 def det_closest(cacti, pteras, dino):
     min = 1000
+    min_obj = None
     for c in cacti:
         distance = c.rect.left - dino.rect.right
         if distance < min:
             min = distance
+            min_obj = c
     for p in pteras:   
         distance = p.rect.left - dino.rect.right
         if distance < min:
             min = distance
-    return min
+            min_obj = p
+    return min, min_obj
 
 
 def act_on_scenario(species, cacti, pteras, dino, scenario, duck_counter):
     reaction = species[scenario]
-    closest = det_closest(cacti, pteras, dino)
+    closest, closest_obj = det_closest(cacti, pteras, dino)
+    if closest_obj and closest_obj.processed:
+        return
     keyboard = Controller()
     if closest <= abs(reaction):
+        closest_obj.processed = True
         if reaction > 0:
             keyboard.press(Key.space)
             keyboard.release(Key.space)
@@ -257,7 +263,7 @@ def main():
     avg_fitness.append(mean([ind.fitness for ind in individuals]))
 
     generations = 0
-    while fittest.fitness < 1000 and generations < 100:
+    while fittest.fitness < 1000 and generations < 3000:
         print("fittest %s: %f" %(fittest, fittest.fitness))
         generations += 1
         print("generation %d" %(generations))

@@ -232,6 +232,7 @@ class Cactus(pygame.sprite.Sprite):
         self.rect.left = width + self.rect.width
         self.image = self.images[random.randrange(0, 3)]
         self.movement = [-1 * speed, 0]
+        self.processed = False
 
     def draw(self):
         screen.blit(self.image, self.rect)
@@ -254,6 +255,7 @@ class Ptera(pygame.sprite.Sprite):
         self.movement = [-1 * speed, 0]
         self.index = 0
         self.counter = 0
+        self.processed = False
 
     def draw(self):
         screen.blit(self.image, self.rect)
@@ -300,6 +302,7 @@ class Cloud(pygame.sprite.Sprite):
         self.rect.left = x
         self.rect.top = y
         self.movement = [-1 * self.speed, 0]
+        self.processed = False
 
     def draw(self):
         screen.blit(self.image, self.rect)
