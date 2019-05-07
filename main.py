@@ -183,7 +183,7 @@ class Dino():
 
     def update(self):
         if self.isJumping:
-            self.movement[1] = self.movement[1] + gravity
+             self.movement[1] = self.movement[1] + gravity
 
         if self.isJumping:
             self.index = 0

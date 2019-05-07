@@ -1,6 +1,11 @@
 import random
 import numpy
 
+
+def fit_function(difference):
+    return 0.24 * numpy.exp((-(difference - 59)**2) / 1152)
+
+
 class Individual:
     """Individual class with a strategy for each scenario 
 
@@ -25,17 +30,11 @@ class Individual:
         Parameters
             arr: copied strategy passed in 
 
-        scenarios that can occur are:
-            0 - small cactus
-            1 - big cactus 
-            2 - double cactus
-            3 - high ptera
-            4 - low ptera
-            TODO: Validate that this is exhaustive
-
         """
         self.size = size
         self.fitness = 0
+        self.death_scenario = -1
+        self.jumped_too_early = None
         if arr is None:
             self.strategy = numpy.array([random.randint(1, 556) for x in range(self.size)])
             for s in range(len(self.strategy)):
@@ -43,6 +42,7 @@ class Individual:
                     self.strategy[s] = 1
         else:
             self.strategy = arr
+
     def __str__(self):
         """Overwritten string representation
         """
@@ -69,14 +69,14 @@ class Individual:
     def __key(self):
         """
         """
-        return (tuple(self.strategy))
+        return tuple(self.strategy)
 
     def __hash__(self):
         """
         """
         return hash(self.__key())
 
-    def __sub__(self,other):
+    def __sub__(self, other):
         """Overwritten subtraction method
         """
         return numpy.linalg.norm(numpy.subtract(numpy.absolute(self.strategy),numpy.absolute(other.strategy)))
@@ -85,7 +85,7 @@ class Individual:
         """Private method that returns a copy of the individual
 
         Returns:
-            Copy of individual with same stategy
+            Copy of individual with same strategy
         """
         b = numpy.zeros(self.size, dtype=numpy.int64)
 
@@ -94,8 +94,7 @@ class Individual:
         return Individual(size=self.size, arr=b)
 
     def mutate(self):
-        """Mutates a single point of the strategy within the interval of -5 and +5
-
+        """Mutates a single point of the strategy within the interval of 1 and 556
 
         Returns:
             copy: a mutated individual 
@@ -117,16 +116,20 @@ class Individual:
         Returns:
             this_crossover, other_crossover: two new crossed individuals 
         """
-        other_crossover = other.__copy() # Need to fix scoping
+        other_crossover = other.__copy()
         this_crossover = self.__copy()
 
-        point = random.randint(1, self.size)
+        point = random.randint(0, self.size)
+        if point + 1 > self.size:
+            other_point = self.size
+        else:
+            other_point = random.randint(point + 1, self.size)
 
-        temp = numpy.zeros(self.size - point, dtype=numpy.int64)
-        numpy.copyto(temp,this_crossover.strategy[point:])
+        temp = numpy.zeros(other_point - point, dtype=numpy.int64)
+        numpy.copyto(temp, this_crossover.strategy[point:other_point])
 
-        this_crossover.strategy[point:] = other_crossover.strategy[point:]
-        other_crossover.strategy[point:] = temp
+        this_crossover.strategy[point:other_point] = other_crossover.strategy[point:other_point]
+        other_crossover.strategy[point:other_point] = temp
 
         return this_crossover, other_crossover
 
@@ -137,6 +140,19 @@ class Individual:
         :param other: Referential Individual
         :return:
         """
+        if other.death_scenario != -1:
+            dif = other.strategy[other.death_scenario] - self.strategy[other.death_scenario]
+            sim_val = fit_function(abs(dif))
+            if other.jumped_too_early:
+                if dif > 0:
+                    return other.fitness * (1 + sim_val)
+                else:
+                    return other.fitness * (1 - sim_val)
+            else:
+                if dif < 0:
+                    return other.fitness * (1 + sim_val)
+                else:
+                    return other.fitness * (1 - sim_val)
         return other.fitness * self.similarity(other)
 
     def similarity(self, other):
@@ -154,5 +170,4 @@ class Individual:
 if __name__ == "__main__":
     one = Individual()
     two = Individual()
-
-    f,t = one.crossover(two)
+    f, t = one.crossover(two)

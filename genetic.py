@@ -1,4 +1,4 @@
-from matplotlib.pyplot import plot,show
+from matplotlib.pyplot import plot, show, figure
 from individual import Individual
 from main import *
 from pynput.keyboard import Key, Controller
@@ -6,7 +6,8 @@ from random import sample, random, randrange
 from operator import attrgetter
 from kmeans import KMeans
 from statistics import mean
-   
+
+
 def det_testers(individuals):
     max_diff = 100
     species1 = None
@@ -30,7 +31,7 @@ def det_closest(cacti, pteras, dino):
         if distance < min:
             min = distance
             min_obj = c
-    for p in pteras:   
+    for p in pteras:
         distance = p.rect.left - dino.rect.right
         if distance < min:
             min = distance
@@ -60,9 +61,9 @@ def act_on_scenario(species, cacti, pteras, dino, scenario, duck_counter):
 def calc_offset(dino, container):
     offset = 0
     # Ignore those past us already
-    for c in container:  
-        if c.rect.right < dino.rect.left:             
-            offset += 1    
+    for c in container:
+        if c.rect.right < dino.rect.left:
+            offset += 1
     return offset
 
 
@@ -78,7 +79,7 @@ def select_scenario(cacti, pteras, dino):
     ptera_amt = len(pteras) - offset_ptera
     if cacti_amt == 1:
         if ptera_amt == 0:
-            return 0  
+            return 0
         elif ptera_amt == 1:
             return 1
         elif ptera_amt == 2:
@@ -104,11 +105,18 @@ def select_scenario(cacti, pteras, dino):
         elif ptera_amt == 2:
             return 8
         else:
-            print("We had no cacti and more than 2 Birds"    )
+            print("We had no cacti and more than 2 Birds")
             exit(-1)
     else:
         print("We had more than 2 cacti")
-        exit(-1)          
+        exit(-1)
+
+
+def cause_of_death(dino, species):
+    if dino.isJumping and dino.movement[1] <= 0:
+        species.jumped_too_early = False
+    else:
+        species.jumped_too_early = True
 
 
 def run_game(species):
@@ -153,8 +161,6 @@ def run_game(species):
                 gameQuit = True
                 gameOver = True
             else:
-                # This seems to process the input and is NOT correlated to game events
-                # Right here seems the best place to decide on movements
                 scenario = select_scenario(cacti, pteras, playerDino)
                 if scenario != last_scenario:
                     last_scenario = scenario
@@ -189,8 +195,12 @@ def run_game(species):
 
             if not move(cacti, playerDino, gamespeed):
                 gameQuit = True
+                species.death_scenario = scenario
+                cause_of_death(playerDino, species)
             if not move(pteras, playerDino, gamespeed):
                 gameQuit = True
+                species.death_scenario = scenario
+                cause_of_death(playerDino, species)
             add_cactus(last_obstacle, gamespeed, cacti)
             add_ptera(last_obstacle, gamespeed, pteras, frame_counter)
 
@@ -205,7 +215,7 @@ def run_game(species):
             scb.update(playerDino.score)
             highsc.update(high_score)
 
-            #draw updated
+            # draw updated
             if pygame.display.get_surface() is not None:
                 screen.fill(background_col)
                 new_ground.draw()
@@ -219,7 +229,6 @@ def run_game(species):
                 playerDino.draw()
                 pygame.display.update()
             clock.tick(FPS)
-
             if playerDino.isDead:
                 gameOver = True
                 if playerDino.score > high_score:
@@ -233,17 +242,15 @@ def run_game(species):
     return playerDino.score
 
 
-
 def main():
-    population = 1000
+    population = 100
     individuals = [None] * population
-    
+
     for spec in range(population):
         individuals[spec] = Individual()
 
-    #initial running of individuals
-    centroids,labels,closest = KMeans(individuals,4).run()
-
+    # initial running of individuals
+    centroids, labels, closest = KMeans(individuals, 4).run()
 
     for centroid in labels.keys():
         centroid.fitness = run_game(centroid)
@@ -252,69 +259,73 @@ def main():
         for individual in labels.get(centroid):
             individual.fitness = individual.fitness_approx(centroid)
 
-    fittest = max(individuals,key=attrgetter('fitness'))
+    fittest = max(individuals, key=attrgetter('fitness'))
 
     avg_fitness = []
     fittest_score = []
 
     generations = 0
-    while generations < 100:
-        print("fittest %s: %f" %(fittest, fittest.fitness))
+    while generations < 10:
+        print("Expected fittest %s:  %f" % (fittest, fittest.fitness))
         fittest_score.append(fittest.fitness)
 
-        print("average fitness is %f" %(mean([ind.fitness for ind in individuals])))
+        print("average fitness is %f" % (mean([ind.fitness for ind in individuals])))
         avg_fitness.append(mean([ind.fitness for ind in individuals]))
 
         generations += 1
-        print("generation %d" %(generations))
+        print("generation %d" % generations)
 
         new_population = []
         while len(new_population) < len(individuals):
             operator = random()
 
-            if operator < .9:
-                ran_sample = sample(individuals,5)
+            if operator < .8:
+                ran_sample = sample(individuals, 5)
                 first_parent = max(ran_sample, key=attrgetter('fitness'))
-                ran_sample = sample(individuals,5)
+                ran_sample = sample(individuals, 5)
                 second_parent = max(ran_sample, key=attrgetter('fitness'))
 
                 first_child, second_child = first_parent.crossover(second_parent)
                 new_population.append(first_child)
                 new_population.append(second_child)
             else:
-                ran_sample = sample(individuals,5)
+                ran_sample = sample(individuals, 5)
                 parent = max(ran_sample, key=attrgetter('fitness'))
                 mutated = parent.mutate()
                 new_population.append(mutated)
 
         individuals = new_population
 
-        centroids,labels,closest = KMeans(individuals,4).run()
+        centroids, labels, closest = KMeans(individuals, 4).run()
 
-        for centroid in labels.keys():
-            print("species %s" %(centroid))
+        for centroid, val in labels.items():
+            print("species %s" % centroid)
+            print("Size of centroid is " + str(len(val)))
             centroid.fitness = run_game(centroid)
 
         for centroid in labels.keys():
             for individual in labels.get(centroid):
                 individual.fitness = individual.fitness_approx(centroid)
 
-        fittest = max(individuals,key=attrgetter('fitness')) if max(individuals,key=attrgetter('fitness')).fitness > fittest.fitness else fittest
+        fittest = max(individuals, key=attrgetter('fitness')  ) if max(individuals, key=attrgetter(
+            'fitness')).fitness > fittest.fitness else fittest
 
     print("running fittest")
     score = run_game(fittest)
-    print("fittest had a score of %d" %(score))
+    print("fittest had a score of %d" % score)
 
     pygame.quit()
     quit()
 
     x = [i for i in range(generations)]
-
-    plot(x,avg_fitness, 'x--')
+    plot(x, avg_fitness, 'x--')
+    figure()
+    # plot(x, fittest_score, '+--')
+    # figure()
+    plot(x, avg_fitness, 'x--')
     plot(x, fittest_score, '+--')
     show()
 
 
 if __name__ == "__main__":
     main()
-
