@@ -37,7 +37,7 @@ class Individual:
         self.size = size
         self.fitness = 0
         if arr is None:
-            self.strategy = numpy.array([random.randint(-556, 556) for x in range(self.size)])
+            self.strategy = numpy.array([random.randint(1, 556) for x in range(self.size)])
             for s in range(len(self.strategy)):
                 if self.strategy[s] == 0:
                     self.strategy[s] = 1
@@ -104,7 +104,7 @@ class Individual:
 
         point = random.randint(0, self.size-1)
 
-        to_mutate.strategy[point] = random.randint(-556, 556)
+        to_mutate.strategy[point] = random.randint(1, 556)
 
         return to_mutate
 

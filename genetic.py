@@ -235,7 +235,7 @@ def run_game(species):
 
 
 def main():
-    population = 100
+    population = 1000
     individuals = [None] * population
     
     for spec in range(population):
@@ -256,10 +256,9 @@ def main():
 
     avg_fitness = []
     fittest_score = []
-    
 
     generations = 0
-    while generations < 3:
+    while generations < 100:
         print("fittest %s: %f" %(fittest, fittest.fitness))
         fittest_score.append(fittest.fitness)
 
@@ -300,7 +299,6 @@ def main():
             for individual in labels.get(centroid):
                 individual.fitness = individual.fitness_approx(centroid)
 
-        
         fittest = max(individuals,key=attrgetter('fitness')) if max(individuals,key=attrgetter('fitness')).fitness > fittest.fitness else fittest
 
     print("running fittest")
