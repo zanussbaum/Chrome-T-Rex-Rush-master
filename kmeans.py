@@ -59,7 +59,7 @@ class KMeans:
         self.labels = labels
 
         if len(self.labels) != self.k:
-            print("wtf")
+            print("wtf ")
 
         for ind in self.dataset:
             difference = [(centroid, abs(ind-centroid)) for centroid in self.centroids]
@@ -86,6 +86,10 @@ class KMeans:
                 new_arr = numpy.sum([a.strategy for a in vals], axis=0)
                 new_arr = numpy.true_divide(new_arr, n)
                 new_ind = Individual(arr=new_arr)
+
+                while new_ind in centroids:
+                    print("choosing another")
+                    new_ind = choice(self.dataset)
 
 
             else:

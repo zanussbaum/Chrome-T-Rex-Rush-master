@@ -7,7 +7,12 @@ from operator import attrgetter
 from kmeans import KMeans
 from statistics import mean
 
-
+"""
+TODO:
+    Check that random sample returns unique elements
+    Check why that there are a lot of the same elements being added 
+    
+"""
 def det_testers(individuals):
     max_diff = 100
     species1 = None
@@ -303,7 +308,7 @@ def main():
         #if for some reason you get less than k labels, try again and hope it works better
         if len(labels) < k: 
             print("trying again ")
-            centroids, labels, closest = KMeans(individuals, k).run()
+             centroids, labels, closest = KMeans(individuals, k).run()
 
         for centroid, val in labels.items():      
             print("species %s" % centroid)

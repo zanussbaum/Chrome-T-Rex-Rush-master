@@ -66,6 +66,9 @@ class Individual:
         """
         return numpy.array_equal(self.strategy, other.strategy)
 
+    def __ne__(self,other):
+        return not self.__eq__(other)
+
     def __key(self):
         """
         """
@@ -74,7 +77,7 @@ class Individual:
     def __hash__(self):
         """
         """
-        return hash(self.__key())
+         return hash(self.__key())
 
     def __sub__(self, other):
         """Overwritten subtraction method
