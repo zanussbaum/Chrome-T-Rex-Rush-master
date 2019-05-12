@@ -119,7 +119,7 @@ class KMeans:
 
 
 if __name__ == '__main__':
-    pop = 20
+    pop = 100
 
     ind = [None] * pop
 
@@ -127,14 +127,15 @@ if __name__ == '__main__':
         ind[i] = Individual()
         print("individual %d is %s" %(i, ind[i]))
 
-    kmeans = KMeans(ind, 3)
+    kmeans = KMeans(ind, 10)
     centroids, labels, min_ind =  kmeans.run()
 
 
     # for c in centroids:
     #     print("centroid: %s" %c)
     
-    # print(labels)
+    for c in labels:
+        print(len(labels.get(c)))
 
     # for c in centroids:
     #     diff = [(i, abs(i-c)) for i in ind]

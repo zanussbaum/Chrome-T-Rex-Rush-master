@@ -1,4 +1,4 @@
-from matplotlib.pyplot import plot, show, figure
+from matplotlib.pyplot import plot, show, figure, savefig
 from individual import Individual
 from main import *
 from pynput.keyboard import Key, Controller
@@ -250,7 +250,7 @@ def main():
         individuals[spec] = Individual()
 
     # initial running of individuals
-    centroids, labels, closest = KMeans(individuals, 4).run()
+    centroids, labels, closest = KMeans(individuals, 10).run()
 
     for centroid in labels.keys():
         centroid.fitness = run_game(centroid)
@@ -276,7 +276,8 @@ def main():
         print("generation %d" % generations)
 
         new_population = []
-        while len(new_population) < len(individuals):
+        print("population size %d" %len(individuals))
+        while len(new_population) < population:
             operator = random()
 
             if operator < .8:
@@ -296,9 +297,9 @@ def main():
 
         individuals = new_population
 
-        centroids, labels, closest = KMeans(individuals, 4).run()
+        centroids, labels, closest = KMeans(individuals, 10).run()
 
-        for centroid, val in labels.items():
+        for centroid, val in labels.items():      
             print("species %s" % centroid)
             print("Size of centroid is " + str(len(val)))
             centroid.fitness = run_game(centroid)
@@ -319,11 +320,13 @@ def main():
 
     x = [i for i in range(generations)]
     plot(x, avg_fitness, 'x--')
+    savefig("figs/avg_fitness.png")
     figure()
     # plot(x, fittest_score, '+--')
     # figure()
     plot(x, avg_fitness, 'x--')
     plot(x, fittest_score, '+--')
+    savefig("figs/fitness_and_fittest.png")
     show()
 
 
