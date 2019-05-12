@@ -244,13 +244,14 @@ def run_game(species):
 
 def main():
     population = 100
+    k = 10
     individuals = [None] * population
 
     for spec in range(population):
         individuals[spec] = Individual()
 
     # initial running of individuals
-    centroids, labels, closest = KMeans(individuals, 10).run()
+    centroids, labels, closest = KMeans(individuals, k).run()
 
     for centroid in labels.keys():
         centroid.fitness = run_game(centroid)
@@ -265,7 +266,7 @@ def main():
     fittest_score = []
 
     generations = 0
-    while generations < 10:
+    while generations < 100:
         print("Expected fittest %s:  %f" % (fittest, fittest.fitness))
         fittest_score.append(fittest.fitness)
 
@@ -297,7 +298,12 @@ def main():
 
         individuals = new_population
 
-        centroids, labels, closest = KMeans(individuals, 10).run()
+        centroids, labels, closest = KMeans(individuals, k).run()
+
+        #if for some reason you get less than k labels, try again and hope it works better
+        if len(closest) < k: 
+            print("trying again ")
+            centroids, labels, closest = KMeans(individuals, k).run()
 
         for centroid, val in labels.items():      
             print("species %s" % centroid)
@@ -318,7 +324,7 @@ def main():
     pygame.quit()
     quit()
 
-    filename = "population_" + str(population) + "_generations_" + str(generations)
+    filename = "BPopulation_" + str(population) + "_generations_" + str(generations)
     x = [i for i in range(generations)]
     plt.plot(x, avg_fitness, 'x--')
     plt.xlabel("generations")
