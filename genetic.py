@@ -1,4 +1,4 @@
-from matplotlib.pyplot import plot, show, figure, savefig
+import matplotlib.pyplot as plt
 from individual import Individual
 from main import *
 from pynput.keyboard import Key, Controller
@@ -318,16 +318,22 @@ def main():
     pygame.quit()
     quit()
 
+    filename = "population_" + str(population) + "_generations_" + str(generations)
     x = [i for i in range(generations)]
-    plot(x, avg_fitness, 'x--')
-    savefig("figs/avg_fitness.png")
-    figure()
-    # plot(x, fittest_score, '+--')
-    # figure()
-    plot(x, avg_fitness, 'x--')
-    plot(x, fittest_score, '+--')
-    savefig("figs/fitness_and_fittest.png")
-    show()
+    plt.plot(x, avg_fitness, 'x--')
+    plt.xlabel("generations")
+    plt.ylabel("fitness")
+    plt.title("average fitness over %d generations" %generations)
+    plt.savefig("figs/" + filename + "avg_fitness.png")
+    plt.figure()
+   
+    plt.plot(x, avg_fitness, 'x--')
+    plt.plot(x, fittest_score, '+--')
+    plt.xlabel("generations")
+    plt.ylabel("fitness")
+    plt.title("average fitness and fittest score over %d generations" %generations)
+    plt.savefig("figs/" + filename + "fitness_and_fittest.png")
+    plt.show()
 
 
 if __name__ == "__main__":
