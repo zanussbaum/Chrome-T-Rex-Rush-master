@@ -301,7 +301,7 @@ def main():
         centroids, labels, closest = KMeans(individuals, k).run()
 
         #if for some reason you get less than k labels, try again and hope it works better
-        if len(closest) < k: 
+        if len(labels) < k: 
             print("trying again ")
             centroids, labels, closest = KMeans(individuals, k).run()
 

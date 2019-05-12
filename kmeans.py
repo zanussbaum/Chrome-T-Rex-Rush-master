@@ -61,10 +61,9 @@ class KMeans:
         for ind in self.dataset:
             difference = [(centroid, abs(ind-centroid)) for centroid in self.centroids]
             centroid = min(difference, key=lambda t: t[1])
-            if ind not in self.labels.keys():
-                labels = self.labels.get(centroid[0])
-                labels.append(ind)
-                self.labels.update({centroid[0]:labels})
+            labels = self.labels.get(centroid[0])
+            labels.append(ind)
+            self.labels.update({centroid[0]:labels})
             
     def new_centroids(self):
         """Calculates the new centroids from the given labels
@@ -105,8 +104,13 @@ class KMeans:
             self.prev_centroids = self.centroids
 
             self.write_labels()
+            if(len(self.labels) != self.k):
+                print("wtf")
 
             self.new_centroids()
+
+            if(len(self.labels) != self.k):
+                print("wtf2")
 
         closest_centroids = []
 
