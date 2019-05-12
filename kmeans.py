@@ -58,12 +58,16 @@ class KMeans:
 
         self.labels = labels
 
+        if len(self.labels) != self.k:
+            print("wtf")
+
         for ind in self.dataset:
             difference = [(centroid, abs(ind-centroid)) for centroid in self.centroids]
             centroid = min(difference, key=lambda t: t[1])
-            labels = self.labels.get(centroid[0])
-            labels.append(ind)
-            self.labels.update({centroid[0]:labels})
+            if ind not in self.labels.keys():
+                labels = self.labels.get(centroid[0])
+                labels.append(ind)
+                self.labels.update({centroid[0]:labels})
             
     def new_centroids(self):
         """Calculates the new centroids from the given labels
@@ -83,9 +87,12 @@ class KMeans:
                 new_arr = numpy.true_divide(new_arr, n)
                 new_ind = Individual(arr=new_arr)
 
-            #if centroid has no other labels, randomly reinitialize a new centroid
+
             else:
                 new_ind = choice(self.dataset)
+                while new_ind in centroids:
+                    print("choosing another")
+                    new_ind = choice(self.dataset)
 
             
             centroids.append(new_ind)
@@ -104,13 +111,8 @@ class KMeans:
             self.prev_centroids = self.centroids
 
             self.write_labels()
-            if(len(self.labels) != self.k):
-                print("wtf")
 
             self.new_centroids()
-
-            if(len(self.labels) != self.k):
-                print("wtf2")
 
         closest_centroids = []
 
