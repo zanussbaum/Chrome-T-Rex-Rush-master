@@ -36,7 +36,7 @@ class Individual:
         self.death_scenario = -1
         self.jumped_too_early = None
         if arr is None:
-            self.strategy = numpy.array([random.randint(1, 556) for x in range(self.size)])
+            self.strategy = numpy.random.uniform(low=1.0, high=556.0,size=self.size)
             for s in range(len(self.strategy)):
                 if self.strategy[s] == 0:
                     self.strategy[s] = 1
@@ -77,8 +77,8 @@ class Individual:
     def __hash__(self):
         """
         """
-         return hash(self.__key())
-
+        return hash(self.__key())
+      
     def __sub__(self, other):
         """Overwritten subtraction method
         """
@@ -90,7 +90,7 @@ class Individual:
         Returns:
             Copy of individual with same strategy
         """
-        b = numpy.zeros(self.size, dtype=numpy.int64)
+        b = numpy.zeros(self.size, dtype=numpy.float64)
 
         numpy.copyto(b, self.strategy)
 
@@ -128,7 +128,7 @@ class Individual:
         else:
             other_point = random.randint(point + 1, self.size)
 
-        temp = numpy.zeros(other_point - point, dtype=numpy.int64)
+        temp = numpy.zeros(other_point - point, dtype=numpy.float64)
         numpy.copyto(temp, this_crossover.strategy[point:other_point])
 
         this_crossover.strategy[point:other_point] = other_crossover.strategy[point:other_point]

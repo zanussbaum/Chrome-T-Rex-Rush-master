@@ -2,6 +2,16 @@ import numpy
 from individual import Individual
 from random import sample, choice
 
+
+
+def sample(dataset, k):
+    sampled = set()
+
+    while len(sampled) < k:
+        choose = choice(dataset)
+        sampled.add(choose)
+
+    return sampled
 class KMeans:
     """KMeans Algorithm for instance Individuals
 
@@ -21,7 +31,6 @@ class KMeans:
         self.centroids = self.random_centroids()
         self.prev_centroids = None
 
-
     def random_centroids(self):
         """Initialize centroids to random centers
 
@@ -30,9 +39,11 @@ class KMeans:
         Returns:
             list: random centroids
         """
-        centroids = sample(self.dataset,self.k)
+        centroids = sample(self.dataset,self.k) 
+
 
         return centroids
+
 
     def stopping_condition(self):
         """Stopping condition for the kmeans algorithm
@@ -51,15 +62,13 @@ class KMeans:
 
         Creates a mapping of centroids to a list of individuals
         """
+
         labels = {}
-         
         for c in self.centroids:
             labels.update({c:[]})
 
-        self.labels = labels
+        self.labels = labels 
 
-        if len(self.labels) != self.k:
-            print("wtf ")
 
         for ind in self.dataset:
             difference = [(centroid, abs(ind-centroid)) for centroid in self.centroids]
@@ -76,7 +85,7 @@ class KMeans:
             reassigns the centroid to a random individual in the dataset
         """
 
-        centroids = []
+        centroids = set()
 
         for cent in self.labels.keys():
             vals = self.labels.get(cent)
@@ -87,19 +96,15 @@ class KMeans:
                 new_arr = numpy.true_divide(new_arr, n)
                 new_ind = Individual(arr=new_arr)
 
-                while new_ind in centroids:
-                    print("choosing another")
-                    new_ind = choice(self.dataset)
-
-
-            else:
-                new_ind = choice(self.dataset)
-                while new_ind in centroids:
-                    print("choosing another")
-                    new_ind = choice(self.dataset)
-
+            else: 
+                new_ind = cent
             
-            centroids.append(new_ind)
+            centroids.add(new_ind)
+
+        while len(centroids) < self.k:
+            print("adding new centroids")
+            chosen = choice(self.dataset)
+            centroids.add(chosen)
 
         self.centroids = centroids
 
@@ -129,26 +134,27 @@ class KMeans:
 
 
 if __name__ == '__main__':
-    pop = 100
+    pop = 5
 
     ind = [None] * pop
 
     for i in range(len(ind)):
         ind[i] = Individual()
-        print("individual %d is %s" %(i, ind[i]))
-
-    kmeans = KMeans(ind, 10)
-    centroids, labels, min_ind =  kmeans.run()
+        print(ind[i])
 
 
-    # for c in centroids:
-    #     print("centroid: %s" %c)
-    
-    for c in labels:
-        print(len(labels.get(c)))
+    ind[3] = ind[4]
+    ind[2] = ind[4]
 
-    # for c in centroids:
-    #     diff = [(i, abs(i-c)) for i in ind]
-    #     min_ind = min(diff, key=lambda t:t[1])
-    #     print("the closest centroid for centroid %s in the list is %s" %(c, min_ind))
+    s = sample(ind,3)
+
+    print(s)
+
+
+    # kmeans = KMeans(ind, 10)
+    # centroids, labels, min_ind =  kmeans.run()
+
+    # for c in labels:
+    #     print(len(labels.get(c)))
+
 

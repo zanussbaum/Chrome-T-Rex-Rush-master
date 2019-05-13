@@ -308,7 +308,7 @@ def main():
         #if for some reason you get less than k labels, try again and hope it works better
         if len(labels) < k: 
             print("trying again ")
-             centroids, labels, closest = KMeans(individuals, k).run()
+            centroids, labels, closest = KMeans(individuals, k).run()
 
         for centroid, val in labels.items():      
             print("species %s" % centroid)
@@ -329,7 +329,7 @@ def main():
     pygame.quit()
     quit()
 
-    filename = "BPopulation_" + str(population) + "_generations_" + str(generations)
+    filename = "CPopulation_" + str(population) + "_generations_" + str(generations)
     x = [i for i in range(generations)]
     plt.plot(x, avg_fitness, 'x--')
     plt.xlabel("generations")
