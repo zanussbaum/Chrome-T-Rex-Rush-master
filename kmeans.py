@@ -1,17 +1,9 @@
-import numpy
+import numpy as np
+import matplotlib.pyplot as plt
 from individual import Individual
-from random import sample, choice
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
 
-
-
-def sample(dataset, k):
-    sampled = set()
-
-    while len(sampled) < k:
-        choose = choice(dataset)
-        sampled.add(choose)
-
-    return sampled
 class KMeans:
     """KMeans Algorithm for instance Individuals
 
@@ -39,8 +31,7 @@ class KMeans:
         Returns:
             list: random centroids
         """
-        centroids = sample(self.dataset,self.k) 
-
+        centroids = np.random.choice(self.dataset,self.k)
 
         return centroids
 
@@ -55,7 +46,7 @@ class KMeans:
         """
         if self.iterations > self.max_iterations:
             return True
-        return self.centroids == self.prev_centroids
+        return np.array_equal(self.centroids,self.prev_centroids)
 
     def write_labels(self):
         """Maps individuals to centroids by creating labels
@@ -65,7 +56,7 @@ class KMeans:
 
         labels = {}
         for c in self.centroids:
-            labels.update({c:[]})
+            labels.update({(c):[]})
 
         self.labels = labels 
 
@@ -74,7 +65,7 @@ class KMeans:
             difference = [(centroid, abs(ind-centroid)) for centroid in self.centroids]
             centroid = min(difference, key=lambda t: t[1])
             if ind not in self.labels.keys():
-                labels = self.labels.get(centroid[0])
+                labels = self.labels.get((centroid[0]))
                 labels.append(ind)
                 self.labels.update({centroid[0]:labels})
             
@@ -92,19 +83,14 @@ class KMeans:
             n = len(vals)
 
             if n != 0:
-                new_arr = numpy.sum([a.strategy for a in vals], axis=0)
-                new_arr = numpy.true_divide(new_arr, n)
+                new_arr = np.sum([a.strategy for a in vals], axis=0)
+                new_arr = np.true_divide(new_arr, n)
                 new_ind = Individual(arr=new_arr)
 
             else: 
                 new_ind = cent
             
             centroids.add(new_ind)
-
-        while len(centroids) < self.k:
-            print("adding new centroids")
-            chosen = choice(self.dataset)
-            centroids.add(chosen)
 
         self.centroids = centroids
 
@@ -134,26 +120,51 @@ class KMeans:
 
 
 if __name__ == '__main__':
-    pop = 5
+    size = 100
 
-    ind = [None] * pop
+    population = [None] * size
 
-    for i in range(len(ind)):
-        ind[i] = Individual()
-        print(ind[i])
-
-
-    ind[3] = ind[4]
-    ind[2] = ind[4]
-
-    s = sample(ind,3)
-
-    print(s)
+    for i in range(size):
+        population[i] = Individual()
+        print(population[i])
 
 
-    # kmeans = KMeans(ind, 10)
-    # centroids, labels, min_ind =  kmeans.run()
+    X = np.array([ind.strategy for ind in population])
 
+    print("these are the indiviual strategies {}".format(X))
+    scaler = StandardScaler()
+
+    X_scaled = scaler.fit_transform(X)
+
+    pca = PCA(n_components=2)
+
+
+    x = pca.fit_transform(X_scaled)
+
+    pca_pop = [Individual(arr=arr) for arr in x]
+
+
+    print("these are the strategies after PCA {}".format(x))
+    
+    kmeans = KMeans(pca_pop, 10)
+    centroids, labels, min_ind =  kmeans.run()
+    
+    l_centroids = [l.strategy for l in centroids]
+
+    print("there are {} centroids. \n{}".format(len(centroids), centroids))
+    color_list = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 
+    'tab:purple', 'tab:brown', 'tab:pink', 'tab:gray', 'tab:olive', 'tab:cyan']
+
+    for i, label in enumerate(labels.keys()):
+        plt.scatter(label.strategy[0],label.strategy[1],c='black')
+        values = labels.get(label)
+        strategies = [v.strategy for v in values]
+        x_values = [x[0] for x in strategies]
+        y_values = [y[1] for y in strategies]
+        plt.scatter(x_values, y_values, c=color_list[i])
+
+
+    plt.show()
     # for c in labels:
     #     print(len(labels.get(c)))
 

@@ -1,9 +1,9 @@
 import random
-import numpy
+import numpy as np 
 
 
 def fit_function(difference):
-    return 0.24 * numpy.exp((-(difference - 59)**2) / 1152)
+    return 0.24 * np.exp((-(difference - 59)**2) / 1152)
 
 
 class Individual:
@@ -36,10 +36,7 @@ class Individual:
         self.death_scenario = -1
         self.jumped_too_early = None
         if arr is None:
-            self.strategy = numpy.random.uniform(low=1.0, high=556.0,size=self.size)
-            for s in range(len(self.strategy)):
-                if self.strategy[s] == 0:
-                    self.strategy[s] = 1
+            self.strategy = 556 * np.random.rand(self.size)
         else:
             self.strategy = arr
 
@@ -64,7 +61,7 @@ class Individual:
     def __eq__(self, other):
         """Overwritten equality 
         """
-        return numpy.array_equal(self.strategy, other.strategy)
+        return np.array_equal(self.strategy, other.strategy)
 
     def __ne__(self,other):
         return not self.__eq__(other)
@@ -82,7 +79,7 @@ class Individual:
     def __sub__(self, other):
         """Overwritten subtraction method
         """
-        return numpy.linalg.norm(numpy.subtract(numpy.absolute(self.strategy),numpy.absolute(other.strategy)))
+        return np.linalg.norm(self.strategy-other.strategy)
                  
     def __copy(self):
         """Private method that returns a copy of the individual
@@ -90,9 +87,9 @@ class Individual:
         Returns:
             Copy of individual with same strategy
         """
-        b = numpy.zeros(self.size, dtype=numpy.float64)
+        b = np.zeros(self.size, dtype=np.float64)
 
-        numpy.copyto(b, self.strategy)
+        np.copyto(b, self.strategy)
 
         return Individual(size=self.size, arr=b)
 
@@ -128,8 +125,8 @@ class Individual:
         else:
             other_point = random.randint(point + 1, self.size)
 
-        temp = numpy.zeros(other_point - point, dtype=numpy.float64)
-        numpy.copyto(temp, this_crossover.strategy[point:other_point])
+        temp = np.zeros(other_point - point, dtype=np.float64)
+        np.copyto(temp, this_crossover.strategy[point:other_point])
 
         this_crossover.strategy[point:other_point] = other_crossover.strategy[point:other_point]
         other_crossover.strategy[point:other_point] = temp
@@ -165,7 +162,7 @@ class Individual:
         :return:
         """
         difference = other - self
-        norm = numpy.linalg.norm(other.strategy)
+        norm = np.linalg.norm(other.strategy)
 
         return difference/norm
 

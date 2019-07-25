@@ -72,11 +72,6 @@ def calc_offset(dino, container):
     return offset
 
 
-# look at scenario 6
-# F: Whoops true haha, probably best to just delete that one
-#   Or maybe better just hard code that to be no response
-# i think scenario 4 showed up incorrectly
-
 def select_scenario(cacti, pteras, dino):
     offset_cactus = calc_offset(dino, cacti)
     cacti_amt = len(cacti) - offset_cactus
@@ -329,7 +324,7 @@ def main():
     pygame.quit()
     quit()
 
-    filename = "CPopulation_" + str(population) + "_generations_" + str(generations)
+    filename = "figs/CPopulation_" + str(population) + "_generations_" + str(generations)
     x = [i for i in range(generations)]
     plt.plot(x, avg_fitness, 'x--')
     plt.xlabel("generations")

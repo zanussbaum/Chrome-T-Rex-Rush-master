@@ -1,5 +1,5 @@
-.idea
-build
-dist
-pygame
-/*.spec
+*.pyc
+__pycache__/main.cpython-37.pyc
+.vscode/settings.json
+__pycache__/main.cpython-37.pyc
+__pycache__/main.cpython-37.pyc
