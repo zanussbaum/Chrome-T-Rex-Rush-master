@@ -1,5 +1,6 @@
 import random
 import numpy as np 
+import scipy as sp
 
 
 def fit_function(difference):
@@ -153,7 +154,7 @@ class Individual:
                     return other.fitness * (1 + sim_val)
                 else:
                     return other.fitness * (1 - sim_val)
-        return other.fitness * self.similarity(other)
+        return other.fitness * (self.similarity(other))
 
     def similarity(self, other):
         """
@@ -161,10 +162,8 @@ class Individual:
         :param other: the other individual to be compared to
         :return:
         """
-        difference = other - self
-        norm = np.linalg.norm(other.strategy)
-
-        return difference/norm
+        
+        return 1- sp.spatial.distance.jensenshannon(self.strategy,other.strategy)
 
 
 if __name__ == "__main__":

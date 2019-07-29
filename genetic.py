@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import numpy as np
 from individual import Individual
 from main import *
 from pynput.keyboard import Key, Controller
@@ -6,6 +7,8 @@ from random import sample, random, randrange
 from operator import attrgetter
 from kmeans import KMeans
 from statistics import mean
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
 
 """
 TODO:
@@ -52,15 +55,15 @@ def act_on_scenario(species, cacti, pteras, dino, scenario, duck_counter):
     keyboard = Controller()
     if closest <= abs(reaction):
         closest_obj.processed = True
-        if reaction > 0:
-            keyboard.press(Key.space)
-            keyboard.release(Key.space)
-        else:
-            if duck_counter < 0:
-                keyboard.release(Key.down)
-            else:
-                keyboard.press(Key.down)
-                keyboard.release(Key.down)
+        # if reaction > 0:
+        keyboard.press(Key.space)
+        keyboard.release(Key.space)
+        # else:
+        #     if duck_counter < 0:
+        #         keyboard.release(Key.down)
+        #     else:
+        #         keyboard.press(Key.down)
+        #         keyboard.release(Key.down)
 
 
 def calc_offset(dino, container):
@@ -164,12 +167,12 @@ def run_game(species):
                 scenario = select_scenario(cacti, pteras, playerDino)
                 if scenario != last_scenario:
                     last_scenario = scenario
-                if duck_counter > 0:
-                    duck_counter -= 1
-                    playerDino.isDucking = True
-                else:
-                    playerDino.isDucking = False
-                if not (playerDino.isJumping and playerDino.isDucking and playerDino.isDead):
+                # if duck_counter > 0:
+                #     duck_counter -= 1
+                #     playerDino.isDucking = True
+                # else:
+                #     playerDino.isDucking = False
+                if not (playerDino.isJumping and playerDino.isDead):
                     act_on_scenario(species.strategy, cacti, pteras, playerDino, scenario, duck_counter)
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
@@ -184,14 +187,14 @@ def run_game(species):
                                         jump_sound.play()
                                     playerDino.movement[1] = -1 * playerDino.jumpSpeed
 
-                        if event.key == pygame.K_DOWN:
-                            if not (playerDino.isJumping and playerDino.isDead):
-                                playerDino.isDucking = True
-                                duck_counter = 50
+                        # if event.key == pygame.K_DOWN:
+                        #     if not (playerDino.isJumping and playerDino.isDead):
+                        #         playerDino.isDucking = True
+                        #         duck_counter = 50
 
-                    if event.type == pygame.KEYUP:
-                        if event.key == pygame.K_DOWN and duck_counter <= 0:
-                            playerDino.isDucking = False
+                    # if event.type == pygame.KEYUP:
+                    #     if event.key == pygame.K_DOWN and duck_counter <= 0:
+                    #         playerDino.isDucking = False
 
             if not move(cacti, playerDino, gamespeed):
                 gameQuit = True
@@ -247,18 +250,37 @@ def main():
     k = 10
     individuals = [None] * population
 
+    X = []
+
     for spec in range(population):
         individuals[spec] = Individual()
+        # individuals[spec].fitness = run_game(individuals[spec])
+        X.append(individuals[spec].strategy)
+
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X)
+
+    pca = PCA(n_components=2)
+    pca_x = pca.fit_transform(X_scaled)
+    pca_pop = [Individual(arr=arr) for arr in pca_x]
 
     # initial running of individuals
-    centroids, labels, closest = KMeans(individuals, k).run()
+    centroids, labels, closest = KMeans(pca_pop, k).run()
+    # centroids, labels, closest = KMeans(individuals, k).run()
 
-    for centroid in labels.keys():
-        centroid.fitness = run_game(centroid)
+    centroids_list = [l.strategy for l in centroids]
 
-    for centroid in labels.keys():
+    revert = scaler.inverse_transform(pca.inverse_transform(centroids_list))
+
+    centroid_individuals = [Individual(arr=arr) for arr in revert]
+
+    for centroid in centroid_individuals:
+        centroid.fitness = run_game(centroid) - 19
+
+    for i,centroid in enumerate(labels.keys()):
         for individual in labels.get(centroid):
-            individual.fitness = individual.fitness_approx(centroid)
+            index = np.where(pca_x == individual.strategy)[0][0]
+            individuals[index].fitness = individuals[index].fitness_approx(centroid_individuals[i])
 
     fittest = max(individuals, key=attrgetter('fitness'))
 
@@ -266,7 +288,7 @@ def main():
     fittest_score = []
 
     generations = 0
-    while generations < 100:
+    while generations < 10:
         print("Expected fittest %s:  %f" % (fittest, fittest.fitness))
         fittest_score.append(fittest.fitness)
 
@@ -281,7 +303,7 @@ def main():
         while len(new_population) < population:
             operator = random()
 
-            if operator < .8:
+            if operator < .8 :
                 ran_sample = sample(individuals, 5)
                 first_parent = max(ran_sample, key=attrgetter('fitness'))
                 ran_sample = sample(individuals, 5)
@@ -297,25 +319,37 @@ def main():
                 new_population.append(mutated)
 
         individuals = new_population
+        # for ind in individuals:
+        #     ind.fitness = run_game(ind)
 
-        centroids, labels, closest = KMeans(individuals, k).run()
+        new_fittest = max(individuals, key=attrgetter('fitness'))
+        if new_fittest.fitness > fittest.fitness:
+            fittest = new_fittest
+        X = [arr.strategy for arr in individuals]
 
-        #if for some reason you get less than k labels, try again and hope it works better
-        if len(labels) < k: 
-            print("trying again ")
-            centroids, labels, closest = KMeans(individuals, k).run()
+        scaler = StandardScaler()
+        X_scaled = scaler.fit_transform(X)
 
-        for centroid, val in labels.items():      
-            print("species %s" % centroid)
-            print("Size of centroid is " + str(len(val)))
-            centroid.fitness = run_game(centroid)
+        pca = PCA(n_components=2)
+        pca_x = pca.fit_transform(X_scaled)
+        pca_pop = [Individual(arr=arr) for arr in pca_x]
+ 
+        # initial running of individuals
+        centroids, labels, closest = KMeans(pca_pop, k).run()
 
-        for centroid in labels.keys():
-            for individual in labels.get(centroid):
-                individual.fitness = individual.fitness_approx(centroid)
+        centroids_list = [l.strategy for l in centroids]
 
-        fittest = max(individuals, key=attrgetter('fitness')  ) if max(individuals, key=attrgetter(
-            'fitness')).fitness > fittest.fitness else fittest
+        revert = scaler.inverse_transform(pca.inverse_transform(centroids_list))
+
+        centroid_individuals = [Individual(arr=arr) for arr in revert]
+
+        for centroid in centroid_individuals:
+            centroid.fitness = run_game(centroid) - 19
+
+        for i,centroid in enumerate(labels.keys()):
+            for individual in labels.get(centroid): 
+                index = np.where(pca_x == individual.strategy)[0][0]
+                individuals[index].fitness = individuals[index].fitness_approx(centroid_individuals[i])
 
     print("running fittest")
     score = run_game(fittest)
@@ -324,7 +358,7 @@ def main():
     pygame.quit()
     quit()
 
-    filename = "figs/CPopulation_" + str(population) + "_generations_" + str(generations)
+    filename = "CPopulation_" + str(population) + "_generations_" + str(generations)
     x = [i for i in range(generations)]
     plt.plot(x, avg_fitness, 'x--')
     plt.xlabel("generations")

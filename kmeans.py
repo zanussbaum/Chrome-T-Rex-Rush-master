@@ -4,6 +4,9 @@ from individual import Individual
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 
+color_list = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 
+    'tab:purple', 'tab:brown', 'tab:pink', 'tab:gray', 'tab:olive', 'tab:cyan']
+
 class KMeans:
     """KMeans Algorithm for instance Individuals
 
@@ -116,6 +119,19 @@ class KMeans:
             min_ind = min(diff, key=lambda t:t[1])
             closest_centroids.append(min_ind[0])
 
+        for i, label in enumerate(self.labels.keys()):
+            plt.scatter(label.strategy[0],label.strategy[1],c='black')
+            values = self.labels.get(label)
+            strategies = [v.strategy for v in values]
+            x_values = [x[0] for x in strategies]
+            y_values = [y[1] for y in strategies]
+            plt.scatter(x_values, y_values,c=color_list[i])
+
+ 
+        plt.show(block=False)
+        plt.pause(3)
+        plt.close()
+
         return self.centroids, self.labels, closest_centroids
 
 
@@ -136,10 +152,13 @@ if __name__ == '__main__':
 
     X_scaled = scaler.fit_transform(X)
 
+
     pca = PCA(n_components=2)
 
 
     x = pca.fit_transform(X_scaled)
+
+
 
     pca_pop = [Individual(arr=arr) for arr in x]
 
@@ -151,9 +170,13 @@ if __name__ == '__main__':
     
     l_centroids = [l.strategy for l in centroids]
 
+    revert = scaler.inverse_transform(pca.inverse_transform(l_centroids))
+
+    print("inverted centroids are {}".format(revert))
+    print("labels and centroids: {}".format(labels))
+
     print("there are {} centroids. \n{}".format(len(centroids), centroids))
-    color_list = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 
-    'tab:purple', 'tab:brown', 'tab:pink', 'tab:gray', 'tab:olive', 'tab:cyan']
+    
 
     for i, label in enumerate(labels.keys()):
         plt.scatter(label.strategy[0],label.strategy[1],c='black')
@@ -162,6 +185,11 @@ if __name__ == '__main__':
         x_values = [x[0] for x in strategies]
         y_values = [y[1] for y in strategies]
         plt.scatter(x_values, y_values, c=color_list[i])
+
+
+    for _,label in labels.items():
+        index = np.where(x == label.strategy)
+        print(index)
 
 
     plt.show()
